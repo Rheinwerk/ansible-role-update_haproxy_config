@@ -1,0 +1,14 @@
+---
+
+# ANSIBLE 2 ISSUE: Need to specify the handlers fully, because
+# otherwise whatever variable is used always has the first
+# value it was ever bound to, not the one the role currently
+# uses.
+
+- name: Reload haproxy demo-haproxy
+  service: name="demo-haproxy" state=reloaded
+  when: _haproxy.reload_if_changed and (configuration|changed or certificates|changed or error_files|changed)
+- name: Restart rsyslog
+  service: name="rsyslog" state=restarted
+  when: _haproxy.reload_if_changed and rsyslog|changed
+

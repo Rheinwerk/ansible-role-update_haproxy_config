@@ -1,0 +1,48 @@
+# vim: ft=yaml et ts=2
+---
+
+_haproxy:
+  instance_name: "demo-haproxy"
+  logging:
+    facility: "local1"
+    level: "info"
+    tag: "haproxy"
+    address: "/dev/log"
+    length: 350
+  autostart: no
+  reload_if_changed: no
+  chroot:
+    directory: "/var/lib/haproxy"
+  admin:
+    user: "admin"
+    password: "secret-from-vault"
+    binds:
+      - { ip: "127.0.0.1", port: 8404 }
+      - { ip: "{{ ansible_default_ipv4.address }}", port: 8404 }
+  ciphers: "ECDH:EDH:DH:!ECDSA:!DSS:!ADH:!NULL:!aNULL:!LOW:!MD5:!RC4:!DES:!3DES:!SEED:!CAMELLIA:!EXPORT"
+  frontend_bind_ip: "{{ ansible_default_ipv4.address }}"
+  resolvers:
+    - id: default
+      nameservers:
+        - { id: "local", ip: "127.0.0.1",       port: 53 }
+        - { id: "aws",   ip: "169.254.169.253", port: 53 }
+      options:
+        - "resolve_retries   3"
+        - "timeout retry    1s"
+        - "hold other      30s"
+        - "hold refused    30s"
+        - "hold nx         30s"
+        - "hold timeout    30s"
+        - "hold valid      10s"
+  proxies:
+    - name: "proxy1"
+      options: [ ]
+      binds:   [ { ip: "127.0.0.1", port: 8080 } ]
+      servers: [ { name: "server1", ip: "server1", port: 8080, ssl: true } ]
+    - name: "proxy2"
+      options: [ "option dontlog-normal"]
+      binds:   [ { ip: "127.0.0.1", port: 9090, ssl: true } ]
+      servers:
+        - { name: "server1", ip: "server1.example.com", port: 9200, ssl: false }
+        - { name: "server2", ip: "server2.example.com", port: 9200, ssl: false }
+

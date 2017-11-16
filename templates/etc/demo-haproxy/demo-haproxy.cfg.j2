@@ -1,0 +1,71 @@
+# {{ansible_managed}}
+# vim: ft=haproxy
+global
+  log {{ _haproxy.logging.address }}{% if _haproxy.logging.length is defined %} len {{ _haproxy.logging.length }}{% endif %} {{ _haproxy.logging.facility }} {{ _haproxy.logging.level|default("info") }}
+{% if _haproxy.logging.tag is defined %}
+  log-tag {{ _haproxy.logging.tag }}
+{% endif %}
+  stats socket /var/run/{{ _haproxy.instance_name }}.stat user haproxy group haproxy mode 600 level admin
+{% if _haproxy.chroot is defined %}
+  chroot {{ _haproxy.chroot.directory }}
+{% endif %}
+  user haproxy
+  group haproxy
+  ssl-default-bind-ciphers {{ _haproxy.ciphers }}
+  ssl-default-bind-options no-sslv3
+  tune.ssl.default-dh-param 2048
+  hard-stop-after 30s
+
+
+defaults
+  mode tcp
+  log global
+  option tcplog
+  option dontlognull
+  option http-keep-alive
+  timeout http-request 10s
+  timeout queue 1m
+  timeout connect 5s
+  timeout client 2m
+  timeout server 2m
+  timeout http-keep-alive 10s
+  timeout check 5s
+  retries 3
+  maxconn 2000
+
+{% for r in _haproxy.resolvers  %}
+resolvers {{ r.id }}
+{% for ns in r.nameservers %}
+  nameserver {{ ns.id }} {{ ns.ip }}:{{ ns.port|default(53) }}
+{% for o in ns.options %}
+  {{ o }}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+listen admin
+  bind {% for bind in _haproxy.admin.binds %}{{ bind.ip }}:{{ bind.port }}{%if not loop.last%},{%endif%}{%endfor%}
+
+  mode http
+  stats enable
+  stats auth {{ _haproxy.admin.user }}:{{ _haproxy.admin.password }}
+  stats uri /monitor
+  stats show-node
+  stats show-desc instance name sidecar {{ _haproxy.instance_name }}
+  stats refresh 10s
+
+{% for p in _haproxy.proxies %}
+listen {{ p.name }}
+{% for bind in p.binds %}
+  bind {{ bind.ip }}:{{ bind.port }}{% if bind.ssl|default(false) %} ssl crt /etc/{{ _haproxy.instance_name }}/ssl{% endif %}
+
+{% endfor %}
+{% for opt in p.options %}
+  {{ opt }}
+{% endfor %}
+{% for srv in p.servers %}
+  server {{ srv.name }} {{ srv.ip }}:{{ srv.port }} check{% if srv.ssl %} ssl verify required ca-file {{ _haproxy.ca_file|default("/etc/ssl/certs/ca-certificates.crt") }}{% endif %}
+{% endfor %}
+
+
+{% endfor %}
