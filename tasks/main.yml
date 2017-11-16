@@ -15,11 +15,8 @@
 - name: Create haproxy config directory
   file: path="/etc/{{ _haproxy.instance_name }}" state=directory owner=root group=haproxy mode=0755
 
-- name: Create customized init.d script
-  template: src="etc/init.d/haproxy.j2" dest="/etc/init.d/{{ _haproxy.instance_name }}" mode=0755 owner=root group=root
-
-- name: Disable Service Autostart
-  service: name="{{ _haproxy.instance_name }}" enabled=no
+- name: Configure Service Autostart
+  service: name="{{ _haproxy.instance_name }}" enabled={{ _haproxy.autostart }}
 
 - name: Check certificates to be copied
   local_action: stat path="files/etc/{{ _haproxy.instance_name }}/ssl"
