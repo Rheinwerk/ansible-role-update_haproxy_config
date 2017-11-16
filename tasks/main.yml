@@ -51,7 +51,7 @@
   when: _haproxy.token_map_file is defined
 
 - name: Create HAProxy configuration file
-  template: src="{% if _haproxy.use_default_template %}etc/haproxy/haproxy.cfg.j2{% else %}etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg{% if _haproxy.use_consul_template%}.ctpl{% endif %}.j2{% endif %}" dest="/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}{% if _haproxy.use_consul_template%}.ctpl{% endif %}.cfg" owner=root group=haproxy mode=0640
+  template: src="{% if _haproxy.use_default_template %}etc/haproxy/haproxy.cfg.j2{% else %}etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg{% if _haproxy.use_consul_template%}.ctpl{% endif %}.j2{% endif %}" dest="/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg{% if _haproxy.use_consul_template%}.ctpl{% endif %}" owner=root group=haproxy mode=0640
   register: configuration
   notify: Reload haproxy {{ _haproxy.instance_name }}
 
