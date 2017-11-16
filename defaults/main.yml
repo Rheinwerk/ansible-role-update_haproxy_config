@@ -3,6 +3,7 @@
 
 _haproxy:
   instance_name: "demo-haproxy"
+  use_default_template: yes
   logging:
     facility: "local1"
     level: "info"
