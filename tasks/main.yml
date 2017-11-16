@@ -40,8 +40,8 @@
       copy: src="etc/{{ _haproxy.instance_name}}/errorfiles/{{ item }}" dest="/etc/{{ _haproxy.instance_name }}/errorfiles/{{ item }}" owner=root group=haproxy mode=0640
       with_items: "{{ _haproxy.error_files }}"
       register: error_files
+      notify: Reload haproxy {{ _haproxy.instance_name }}
   when: _haproxy.error_files is defined
-  notify: Reload haproxy {{ _haproxy.instance_name }}
 
 - name: Ensure token map file exists
   file: name="{{ _haproxy.token_map_file.path }}" state=touch owner="{{ _haproxy.token_map_file.owner }}" group="{{ _haproxy.token_map_file.group }}" mode="{{ _haproxy.token_map_file.mode }}"
