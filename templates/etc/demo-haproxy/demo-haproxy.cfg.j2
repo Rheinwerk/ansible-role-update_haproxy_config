@@ -65,6 +65,7 @@ listen {{ p.name }}
 {% endfor %}
 {% for srv in p.servers %}
   server {{ srv.name }} {{ srv.ip }}:{{ srv.port }} check{% if srv.ssl %} ssl verify required ca-file {{ _haproxy.ca_file|default("/etc/ssl/certs/ca-certificates.crt") }}{% endif %}
+
 {% endfor %}
 
 
