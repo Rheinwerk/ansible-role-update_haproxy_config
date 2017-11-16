@@ -10,6 +10,7 @@
     - name: Create rsyslog config for chroot
       template: src="etc/rsyslog.d/haproxy.conf.j2" dest="/etc/rsyslog.d/49-haproxy-{{ _haproxy.instance_name }}.conf"
       register: rsyslog
+      notify: Restart rsyslog
   when: _haproxy.chroot is defined
 
 - name: Create haproxy config directory
@@ -26,6 +27,7 @@
     - name: Install SSL certificates and keys
       copy: src="etc/{{ _haproxy.instance_name }}/ssl" dest="/etc/{{ _haproxy.instance_name }}" mode=0640 owner=root group=haproxy
       register: certificates
+      notify: Reload haproxy {{ _haproxy.instance_name }}
     - name: Inform external collector about our certificate location
       lineinfile: dest=/etc/cert_exp_time_globs owner=root group=root mode=0644 create=yes line="/etc/{{ _haproxy.instance_name }}/ssl/*"
   when: ssl_dir.stat.exists
@@ -39,6 +41,7 @@
       with_items: "{{ _haproxy.error_files }}"
       register: error_files
   when: _haproxy.error_files is defined
+  notify: Reload haproxy {{ _haproxy.instance_name }}
 
 - name: Ensure token map file exists
   file: name="{{ _haproxy.token_map_file.path }}" state=touch owner="{{ _haproxy.token_map_file.owner }}" group="{{ _haproxy.token_map_file.group }}" mode="{{ _haproxy.token_map_file.mode }}"
@@ -47,4 +50,5 @@
 - name: Create HAProxy configuration file
   template: src="etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg.j2" dest="/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg" owner=root group=haproxy mode=0640
   register: configuration
+  notify: Reload haproxy {{ _haproxy.instance_name }}
 
