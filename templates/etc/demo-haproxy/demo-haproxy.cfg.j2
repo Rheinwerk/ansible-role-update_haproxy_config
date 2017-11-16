@@ -37,9 +37,9 @@ defaults
 resolvers {{ r.id }}
 {% for ns in r.nameservers %}
   nameserver {{ ns.id }} {{ ns.ip }}:{{ ns.port|default(53) }}
+{% endfor %}
 {% for o in r.options %}
   {{ o }}
-{% endfor %}
 {% endfor %}
 {% endfor %}
 
