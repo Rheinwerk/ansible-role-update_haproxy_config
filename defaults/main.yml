@@ -22,7 +22,7 @@ _haproxy:
   ciphers: "ECDH:EDH:DH:!ECDSA:!DSS:!ADH:!NULL:!aNULL:!LOW:!MD5:!RC4:!DES:!3DES:!SEED:!CAMELLIA:!EXPORT"
   frontend_bind_ip: "{{ ansible_default_ipv4.address }}"
   resolvers:
-    - id: default
+    - id: "default"
       nameservers:
         - { id: "local", ip: "127.0.0.1",       port: 53 }
         - { id: "aws",   ip: "169.254.169.253", port: 53 }
@@ -42,7 +42,8 @@ _haproxy:
     - name: "proxy2"
       options: [ "option dontlog-normal"]
       binds:   [ { ip: "127.0.0.1", port: 9090, ssl: true } ]
+      resolvers: "default"
       servers:
         - { name: "server1", ip: "server1.example.com", port: 9200, ssl: false }
-        - { name: "server2", ip: "server2.example.com", port: 9200, ssl: false }
+        - { name: "server2", ip: "server2.example.com", port: 9200, ssl: false, resolvers: "other" }
 
