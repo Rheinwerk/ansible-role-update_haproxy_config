@@ -1,4 +1,5 @@
 # {{ansible_managed}}
+# Default Template from update_haproxy_config role
 # vim: ft=haproxy
 global
   log {{ _haproxy.logging.address }}{% if _haproxy.logging.length is defined %} len {{ _haproxy.logging.length }}{% endif %} {{ _haproxy.logging.facility }} {{ _haproxy.logging.level|default("info") }}
