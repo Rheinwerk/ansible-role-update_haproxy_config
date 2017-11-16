@@ -3,5 +3,8 @@
   connection: local
   become: yes
   become_user: root
+  pre_tasks:
+    - group: name=haproxy system=yes
+    - user: name=haproxy group=haproxy system=yes createhome=no
   roles:
     - ansible-role-update_haproxy_config
