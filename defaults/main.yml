@@ -33,7 +33,7 @@ _haproxy:
     - name: "proxy1"
       options: [ ]
       binds:   [ { ip: "127.0.0.1", port: 8080 } ]
-      servers: [ { name: "server1", ip: "server1", port: 8080, ssl: true, check_addr: "127.0.0.2"} ]
+      servers: [ { name: "server1", ip: "server1", port: 8080, ssl: true, check_addr: "127.0.0.2", ssl_verify: "none" } ]
     - name: "proxy2"
       options: [ "option dontlog-normal"]
       binds:   [ { ip: "127.0.0.1", port: 9090, ssl: true } ]
