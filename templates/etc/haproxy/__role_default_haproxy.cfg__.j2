@@ -65,7 +65,7 @@ listen {{ p.name }}
   {{ opt }}
 {% endfor %}
 {% for srv in p.servers %}
-  server {{ srv.name }} {{ srv.ip }}:{{ srv.port }} check addr {{srv.check.addr|default(srv.ip) }} port {{ srv.check.port|default(srv.port) }} {% if srv.resolvers is defined %}resolvers {{ srv.resolvers}}{% elif p.resolvers is defined %}resolvers {{p.resolvers}}{% endif %} {% if srv.ssl %} ssl verify {{ src.ssl_verify|default("required") }} ca-file {{ _haproxy.ca_file|default("/etc/ssl/certs/ca-certificates.crt") }}{% endif %}
+  server {{ srv.name }} {{ srv.ip }}:{{ srv.port }} check addr {{srv.check_addr|default(srv.ip) }} port {{ srv.check_port|default(srv.port) }} {% if srv.resolvers is defined %}resolvers {{ srv.resolvers}}{% elif p.resolvers is defined %}resolvers {{p.resolvers}}{% endif %} {% if srv.ssl %} ssl verify {{ src.ssl_verify|default("required") }} ca-file {{ _haproxy.ca_file|default("/etc/ssl/certs/ca-certificates.crt") }}{% endif %}
 
 {% endfor %}
 
