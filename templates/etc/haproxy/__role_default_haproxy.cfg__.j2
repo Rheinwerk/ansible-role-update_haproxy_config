@@ -65,7 +65,7 @@ listen {{ p.name }}
   {{ opt }}
 {% endfor %}
 {% for srv in p.servers %}
-  server {{ srv.name }} {{ srv.ip }}:{{ srv.port }} {% if srv.resolvers is defined %}resolvers {{ srv.resolvers}}{% elif p.resolvers is defined %}resolvers {{p.resolvers}}{% endif %} check {% if (srv.check_ssl is not defined and srv.ssl) or srv.check_ssl %}check-ssl {% endif %} addr {{srv.check_addr|default(srv.ip) }} port {{ srv.check_port|default(srv.port) }} {% if srv.ssl %} ssl verify {{ srv.ssl_verify|default("required") }} ca-file {{ _haproxy.ca_file|default("/etc/ssl/certs/ca-certificates.crt") }}{% endif %}
+  server {{ srv.name }} {{ srv.ip }}:{{ srv.port }} {% if srv.resolvers is defined %}resolvers {{ srv.resolvers}}{% elif p.resolvers is defined %}resolvers {{p.resolvers}}{% endif %} check {% if (srv.check_ssl is not defined and srv.ssl) or (srv.check_ssl is defined and src.check_ssl) %}check-ssl {% endif %} addr {{srv.check_addr|default(srv.ip) }} port {{ srv.check_port|default(srv.port) }} {% if srv.ssl %} ssl verify {{ srv.ssl_verify|default("required") }} ca-file {{ _haproxy.ca_file|default("/etc/ssl/certs/ca-certificates.crt") }}{% endif %}
 
 {% endfor %}
 
