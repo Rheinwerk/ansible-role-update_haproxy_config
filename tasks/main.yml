@@ -46,6 +46,11 @@
       notify: Reload haproxy {{ _haproxy.instance_name }}
   when: _haproxy.error_files is defined
 
+- name: Copy additional configuration files
+  copy: src="{{ item }}" dest="/etc/{{ _haproxy.instance_name }}/{{ item|basename }}" owner=root group=haproxy mode=0640
+  with_fileglob: "files/etc/{{ _haproxy.instance_name}}/*"
+  notify: Reload haproxy {{ _haproxy.instance_name }}
+
 - name: Ensure token map file exists
   file: name="{{ _haproxy.token_map_file.path }}" state=touch owner="{{ _haproxy.token_map_file.owner }}" group="{{ _haproxy.token_map_file.group }}" mode="{{ _haproxy.token_map_file.mode }}"
   when: _haproxy.token_map_file is defined
