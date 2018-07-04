@@ -11,4 +11,3 @@
 - name: Restart rsyslog
   service: name="rsyslog" state=restarted
   when: _haproxy.reload_if_changed and rsyslog|changed
-

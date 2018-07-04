@@ -43,4 +43,3 @@ _haproxy:
       servers:
         - { name: "server3", ip: "server3.example.com", port: 9200, ssl: false, check_port: 9299 }
         - { name: "server4", ip: "server4.example.com", port: 9200, ssl: false, resolvers: "other" }
-
