@@ -4,23 +4,47 @@
 - debug: msg="Configuring {{ _haproxy.instance_name }}"
 - block:
     - name: Create chroot
-      file: name="{{ _haproxy.chroot.directory }}" state=directory owner="root" group="haproxy" mode="0550"
+      file:
+        name: "{{ _haproxy.chroot.directory }}"
+        state: directory
+        owner: root
+        group: haproxy
+        mode: 0550
     - name: Create chroot/dev for rsyslog
-      file: name="{{ _haproxy.chroot.directory }}/dev" state=directory owner="root" group="haproxy" mode="0550"
+      file:
+        name: "{{ _haproxy.chroot.directory }}/dev"
+        state: directory
+        owner: root
+        group: haproxy
+        mode: 0550
     - name: Create rsyslog config for chroot
-      template: src="etc/rsyslog.d/haproxy.conf.j2" dest="/etc/rsyslog.d/49-haproxy-{{ _haproxy.instance_name }}.conf"
+      template:
+        src: "etc/rsyslog.d/haproxy.conf.j2"
+        dest: "/etc/rsyslog.d/49-haproxy-{{ _haproxy.instance_name }}.conf"
       register: rsyslog
       notify: Restart rsyslog
   when: _haproxy.chroot is defined
 
 - name: Create haproxy config directory
-  file: path="/etc/{{ _haproxy.instance_name }}" state=directory owner=root group=haproxy mode=0755
+  file:
+    path: "/etc/{{ _haproxy.instance_name }}"
+    state: directory
+    owner: root
+    group: haproxy
+    mode: 0755
 
 - name: Create customized init.d script
-  template: src="etc/init.d/haproxy.j2" dest="/etc/init.d/{{ _haproxy.instance_name }}" mode=0755 owner=root group=root
+  template:
+    src: "etc/init.d/haproxy.j2"
+    dest: "/etc/init.d/{{ _haproxy.instance_name }}"
+    owner: root
+    group: root
+    mode: 0755
 
 - name: Configure Service Autostart
-  service: name="{{ _haproxy.instance_name }}" enabled={{ _haproxy.autostart }}
+  service:
+    name: "{{ _haproxy.instance_name }}"
+    enabled: "{{ _haproxy.autostart }}"
 
 - name: Check certificates to be copied
   local_action: stat path="files/etc/{{ _haproxy.instance_name }}/ssl"
@@ -28,34 +52,70 @@
 
 - block:
     - name: Install SSL certificates and keys
-      copy: src="etc/{{ _haproxy.instance_name }}/ssl" dest="/etc/{{ _haproxy.instance_name }}" mode=0640 owner=root group=haproxy
+      copy:
+        src: "etc/{{ _haproxy.instance_name }}/ssl"
+        dest: "/etc/{{ _haproxy.instance_name }}"
+        owner: root
+        group: haproxy
+        mode: 0640
       register: certificates
       notify: Reload haproxy {{ _haproxy.instance_name }}
     - name: Inform external collector about our certificate location
-      lineinfile: dest=/etc/cert_exp_time_globs owner=root group=root mode=0644 create=yes line="/etc/{{ _haproxy.instance_name }}/ssl/*"
+      lineinfile:
+        dest: /etc/cert_exp_time_globs
+        owner: root
+        group: root
+        mode: 0644
+        create: yes
+        line: "/etc/{{ _haproxy.instance_name }}/ssl/*"
   when: ssl_dir.stat.exists
 
 - block:
     - name: Create errorfiles directory
-      file: path="/etc/{{ _haproxy.instance_name }}/errorfiles" state=directory owner=root group=haproxy mode=0755
+      file:
+        path: "/etc/{{ _haproxy.instance_name }}/errorfiles"
+        state: directory
+        owner: root
+        group: haproxy
+        mode: 0755
 
     - name: Copy HAProxy error message files
-      copy: src="etc/{{ _haproxy.instance_name}}/errorfiles/{{ item }}" dest="/etc/{{ _haproxy.instance_name }}/errorfiles/{{ item }}" owner=root group=haproxy mode=0640
+      copy:
+        src: "etc/{{ _haproxy.instance_name}}/errorfiles/{{ item }}"
+        dest: "/etc/{{ _haproxy.instance_name }}/errorfiles/{{ item }}"
+        owner: root
+        group: haproxy
+        mode: 0640
       with_items: "{{ _haproxy.error_files }}"
       register: error_files
       notify: Reload haproxy {{ _haproxy.instance_name }}
   when: _haproxy.error_files is defined
 
 - name: Copy additional configuration files
-  copy: src="{{ item }}" dest="/etc/{{ _haproxy.instance_name }}/{{ item|basename }}" owner=root group=haproxy mode=0640
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/{{ _haproxy.instance_name }}/{{ item|basename }}"
+    owner: root
+    group: haproxy
+    mode: 0640
   with_fileglob: "files/etc/{{ _haproxy.instance_name}}/*"
   notify: Reload haproxy {{ _haproxy.instance_name }}
 
 - name: Ensure token map file exists
-  file: name="{{ _haproxy.token_map_file.path }}" state=touch owner="{{ _haproxy.token_map_file.owner }}" group="{{ _haproxy.token_map_file.group }}" mode="{{ _haproxy.token_map_file.mode }}"
+  file:
+    name: "{{ _haproxy.token_map_file.path }}"
+    state: touch
+    owner: "{{ _haproxy.token_map_file.owner }}"
+    group: "{{ _haproxy.token_map_file.group }}"
+    mode: "{{ _haproxy.token_map_file.mode }}"
   when: _haproxy.token_map_file is defined
 
 - name: Create HAProxy configuration file
-  template: src="{% if _haproxy.use_default_template %}etc/haproxy/__role_default_haproxy.cfg__.j2{% else %}etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg{% if _haproxy.use_consul_template%}.ctpl{% endif %}.j2{% endif %}" dest="/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg{% if _haproxy.use_consul_template%}.ctpl{% endif %}" owner=root group=haproxy mode=0640
+  template:
+    src: "{% if _haproxy.use_default_template %}etc/haproxy/__role_default_haproxy.cfg__.j2{% else %}etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg{% if _haproxy.use_consul_template%}.ctpl{% endif %}.j2{% endif %}"
+    dest: "/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg{% if _haproxy.use_consul_template%}.ctpl{% endif %}"
+    owner: root
+    group: haproxy
+    mode: 0640
   register: configuration
   notify: Reload haproxy {{ _haproxy.instance_name }}
