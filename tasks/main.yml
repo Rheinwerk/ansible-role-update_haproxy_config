@@ -21,6 +21,7 @@
       template:
         src: "etc/rsyslog.d/haproxy.conf.j2"
         dest: "/etc/rsyslog.d/49-haproxy-{{ _haproxy.instance_name }}.conf"
+        mode: 0644
       register: rsyslog
       notify: Restart rsyslog
   when: _haproxy.chroot is defined
