@@ -5,7 +5,7 @@ This role can be used to configure an already installed haproxy instance.
 It is designed to configure rather simple haproxy sidecar instances with straight-forward configurations.
 You can always use a different template, of course.
 
-[![Build Status](https://travis-ci.org/Rheinwerk/ansible-role-update_haproxy_config.svg?branch=master)](https://travis-ci.org/Rheinwerk/ansible-role-update_haproxy_config)
+[![Build Status](https://github.com/Rheinwerk/ansible-role-update_haproxy_config/actions/workflows/ci.yml/badge.svg)](https://github.com/Rheinwerk/ansible-role-update_haproxy_config/actions/workflows/ci.yml)
 
 Requirements
 ------------
