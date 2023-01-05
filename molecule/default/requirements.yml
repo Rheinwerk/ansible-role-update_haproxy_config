@@ -1,0 +1,3 @@
+- src: https://github.com/Rheinwerk/ansible-role-haproxy22.git
+  name: haproxy
+  scm: git

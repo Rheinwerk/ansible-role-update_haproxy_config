@@ -14,7 +14,4 @@ galaxy_info:
     - jammy
   galaxy_tags:
     - haproxy
-dependencies:
-   - name: haproxy
-     src: https://github.com/Rheinwerk/ansible-role-haproxy22.git
-     scm: git
+dependencies: []
