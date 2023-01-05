@@ -1,8 +1,12 @@
 ---
 # Haproxy Configuration Role
 # vim:ft=ansible:ts=2:et:
-- debug: msg="Configuring {{ _haproxy.instance_name }}"
-- block:
+- name: "Print {{ _haproxy.instance_name }}"
+  debug:
+    msg: "Configuring {{ _haproxy.instance_name }}"
+
+- name: Configure HAProxy chroot
+  block:
     - name: Create chroot
       file:
         name: "{{ _haproxy.chroot.directory }}"
@@ -34,11 +38,13 @@
     group: haproxy
     mode: 0755
 
-- set_fact:
+- name: Set Ubuntu 14.04 / 18.04 facts
+  set_fact:
     is_ubuntu1404: "{{ ansible_distribution_version == '14.04' }}"
     is_ubuntu1804: "{{ ansible_distribution_version == '18.04' }}"
 
-- block:
+- name: Configure Init.d scripts
+  block:
     - name: Create customized init.d script
       template:
         src: "etc/init.d/haproxy.j2"
@@ -53,7 +59,8 @@
         enabled: "{{ _haproxy.autostart }}"
   when: is_ubuntu1404 or is_ubuntu1804
 
-- block:
+- name: Configure SystemD scripts
+  block:
     - name: Create HAProxy systemd helper script
       file:
         path: "/var/lib/systemd/deb-systemd-helper-enabled/multi-user.target.wants/{{ _haproxy.instance_name }}.service"
@@ -77,10 +84,13 @@
   when: not (is_ubuntu1404 and is_ubuntu1804)
 
 - name: Check certificates to be copied
-  local_action: stat path="files/etc/{{ _haproxy.instance_name }}/ssl"
+  stat:
+    path: "files/etc/{{ _haproxy.instance_name }}/ssl"
   register: ssl_dir
+  delegate_to: localhost
 
-- block:
+- name: Configure SSL Directory
+  block:
     - name: Install SSL certificates and keys
       copy:
         src: "etc/{{ _haproxy.instance_name }}/ssl"
@@ -100,7 +110,8 @@
         line: "/etc/{{ _haproxy.instance_name }}/ssl/*"
   when: ssl_dir.stat.exists
 
-- block:
+- name: Configure HAProxy Error files
+  block:
     - name: Create errorfiles directory
       file:
         path: "/etc/{{ _haproxy.instance_name }}/errorfiles"
@@ -111,7 +122,7 @@
 
     - name: Copy HAProxy error message files
       copy:
-        src: "etc/{{ _haproxy.instance_name}}/errorfiles/{{ item }}"
+        src: "etc/{{ _haproxy.instance_name }}/errorfiles/{{ item }}"
         dest: "/etc/{{ _haproxy.instance_name }}/errorfiles/{{ item }}"
         owner: root
         group: haproxy
@@ -124,11 +135,11 @@
 - name: Copy additional configuration files
   copy:
     src: "{{ item }}"
-    dest: "/etc/{{ _haproxy.instance_name }}/{{ item|basename }}"
+    dest: "/etc/{{ _haproxy.instance_name }}/{{ item | basename }}"
     owner: root
     group: haproxy
     mode: 0640
-  with_fileglob: "files/etc/{{ _haproxy.instance_name}}/*"
+  with_fileglob: "files/etc/{{ _haproxy.instance_name }}/*"
   notify: Reload haproxy {{ _haproxy.instance_name }}
 
 - name: Ensure token map file exists
@@ -142,8 +153,8 @@
 
 - name: Create HAProxy configuration file
   template:
-    src: "{% if _haproxy.use_default_template %}etc/haproxy/__role_default_haproxy.cfg__.j2{% else %}etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg{% if _haproxy.use_consul_template%}.ctpl{% endif %}.j2{% endif %}"
-    dest: "/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg{% if _haproxy.use_consul_template%}.ctpl{% endif %}"
+    src: "{% if _haproxy.use_default_template %}etc/haproxy/__role_default_haproxy.cfg__.j2{% else %}etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name }}.cfg{% if _haproxy.use_consul_template %}.ctpl{% endif %}.j2{% endif %}"
+    dest: "/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name }}.cfg{% if _haproxy.use_consul_template %}.ctpl{% endif %}"
     owner: root
     group: haproxy
     mode: 0640

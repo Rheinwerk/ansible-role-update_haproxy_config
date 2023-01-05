@@ -1,16 +1,20 @@
 ---
-allow_duplicates: yes
 galaxy_info:
   author: Daniel Schneller
+  namespace: rheinwerk
+  role_name: update_haproxy_config
   description: Configures Haproxy. Intended for rather simple sidecar instances.
   company: Rheinwerk
   license: license (GPLv3)
-  min_ansible_version: 2.2
+  min_ansible_version: 2.9.0
   platforms:
   - name: Ubuntu
     versions:
-    - trusty
+    - focal
+    - jammy
   galaxy_tags:
     - haproxy
-    - update_haproxy_config
-dependencies: []
+dependencies:
+   - name: haproxy
+     src: https://github.com/Rheinwerk/ansible-role-haproxy22.git
+     scm: git
