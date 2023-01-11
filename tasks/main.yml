@@ -38,52 +38,28 @@
     group: haproxy
     mode: 0755
 
-- name: Set Ubuntu 14.04 / 18.04 facts
-  set_fact:
-    is_ubuntu1404: "{{ ansible_distribution_version == '14.04' }}"
-    is_ubuntu1804: "{{ ansible_distribution_version == '18.04' }}"
+- name: Create HAProxy systemd helper script
+  file:
+    path: "/var/lib/systemd/deb-systemd-helper-enabled/multi-user.target.wants/{{ _haproxy.instance_name }}.service"
+    state: "touch"
+    owner: root
+    group: root
+    mode: "0644"
+    access_time: preserve
+    modification_time: preserve
 
-- name: Configure Init.d scripts
-  block:
-    - name: Create customized init.d script
-      template:
-        src: "etc/init.d/haproxy.j2"
-        dest: "/etc/init.d/{{ _haproxy.instance_name }}"
-        owner: root
-        group: root
-        mode: 0755
+- name: Create systemd unit file
+  template:
+    src: "etc/systemd/system/haproxy.service.j2"
+    dest: "/etc/systemd/system/{{ _haproxy.instance_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
 
-    - name: Configure Service Autostart
-      service:
-        name: "{{ _haproxy.instance_name }}"
-        enabled: "{{ _haproxy.autostart }}"
-  when: is_ubuntu1404 or is_ubuntu1804
-
-- name: Configure SystemD scripts
-  block:
-    - name: Create HAProxy systemd helper script
-      file:
-        path: "/var/lib/systemd/deb-systemd-helper-enabled/multi-user.target.wants/{{ _haproxy.instance_name }}.service"
-        state: "touch"
-        owner: root
-        group: root
-        mode: "0644"
-        access_time: preserve
-        modification_time: preserve
-
-    - name: Create systemd unit file
-      template:
-        src: "etc/systemd/system/haproxy.service.j2"
-        dest: "/etc/systemd/system/{{ _haproxy.instance_name }}.service"
-        owner: root
-        group: root
-        mode: "0644"
-
-    - name: Configure Service Autostart
-      systemd:
-        name: "{{ _haproxy.instance_name }}"
-        enabled: "{{ _haproxy.autostart }}"
-  when: not (is_ubuntu1404 and is_ubuntu1804)
+- name: Configure Service Autostart
+  systemd:
+    name: "{{ _haproxy.instance_name }}"
+    enabled: "{{ _haproxy.autostart }}"
 
 - name: Check certificates to be copied
   stat:
