@@ -6,6 +6,7 @@
     msg: "Configuring {{ _haproxy.instance_name }}"
 
 - name: Configure HAProxy chroot
+  when: _haproxy.chroot is defined
   block:
     - name: Create chroot
       file:
@@ -28,7 +29,6 @@
         mode: 0644
       register: rsyslog
       notify: Restart rsyslog
-  when: _haproxy.chroot is defined
 
 - name: Create haproxy config directory
   file:
@@ -92,6 +92,7 @@
   delegate_to: localhost
 
 - name: Configure SSL Directory
+  when: ssl_dir.stat.exists
   block:
     - name: Install SSL certificates and keys
       copy:
@@ -110,9 +111,9 @@
         mode: 0644
         create: yes
         line: "/etc/{{ _haproxy.instance_name }}/ssl/*"
-  when: ssl_dir.stat.exists
 
 - name: Configure HAProxy Error files
+  when: _haproxy.error_files is defined
   block:
     - name: Create errorfiles directory
       file:
@@ -132,7 +133,6 @@
       with_items: "{{ _haproxy.error_files }}"
       register: error_files
       notify: Reload haproxy {{ _haproxy.instance_name }}
-  when: _haproxy.error_files is defined
 
 - name: Copy additional configuration files
   copy:
