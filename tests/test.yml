@@ -6,6 +6,6 @@
   pre_tasks:
     - group: name=haproxy system=yes
     - user: name=haproxy group=haproxy system=yes createhome=no
-    - file: name=/etc/init/demo-haproxy.conf owner=root group=root state=touch
+    - ansible.builtin.file: name=/etc/init/demo-haproxy.conf owner=root group=root state=touch
   roles:
     - ansible-role-update_haproxy_config
