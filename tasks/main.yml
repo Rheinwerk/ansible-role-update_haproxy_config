@@ -2,28 +2,28 @@
 # Haproxy Configuration Role
 # vim:ft=ansible:ts=2:et:
 - name: "Print {{ _haproxy.instance_name }}"
-  debug:
+  ansible.builtin.debug:
     msg: "Configuring {{ _haproxy.instance_name }}"
 
 - name: Configure HAProxy chroot
   when: _haproxy.chroot is defined
   block:
     - name: Create chroot
-      file:
+      ansible.builtin.file:
         name: "{{ _haproxy.chroot.directory }}"
         state: directory
         owner: root
         group: haproxy
         mode: 0550
     - name: Create chroot/dev for rsyslog
-      file:
+      ansible.builtin.file:
         name: "{{ _haproxy.chroot.directory }}/dev"
         state: directory
         owner: root
         group: haproxy
         mode: 0550
     - name: Create rsyslog config for chroot
-      template:
+      ansible.builtin.template:
         src: "etc/rsyslog.d/haproxy.conf.j2"
         dest: "/etc/rsyslog.d/49-haproxy-{{ _haproxy.instance_name }}.conf"
         mode: 0644
@@ -31,7 +31,7 @@
       notify: Restart rsyslog
 
 - name: Create haproxy config directory
-  file:
+  ansible.builtin.file:
     path: "/etc/{{ _haproxy.instance_name }}"
     state: directory
     owner: root
@@ -39,7 +39,7 @@
     mode: 0755
 
 - name: Create HAProxy systemd helper script
-  file:
+  ansible.builtin.file:
     path: "/var/lib/systemd/deb-systemd-helper-enabled/multi-user.target.wants/{{ _haproxy.instance_name }}.service"
     state: "touch"
     owner: root
@@ -49,7 +49,7 @@
     modification_time: preserve
 
 - name: Create systemd unit file
-  template:
+  ansible.builtin.template:
     src: "etc/systemd/system/haproxy.service.j2"
     dest: "/etc/systemd/system/{{ _haproxy.instance_name }}.service"
     owner: root
@@ -57,12 +57,12 @@
     mode: "0644"
 
 - name: Configure Service Autostart
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ _haproxy.instance_name }}"
     enabled: "{{ _haproxy.autostart }}"
 
 - name: Check certificates to be copied
-  stat:
+  ansible.builtin.stat:
     path: "files/etc/{{ _haproxy.instance_name }}/ssl"
   register: ssl_dir
   delegate_to: localhost
@@ -71,7 +71,7 @@
   when: ssl_dir.stat.exists
   block:
     - name: Install SSL certificates and keys
-      copy:
+      ansible.builtin.copy:
         src: "etc/{{ _haproxy.instance_name }}/ssl"
         dest: "/etc/{{ _haproxy.instance_name }}"
         owner: root
@@ -80,7 +80,7 @@
       register: certificates
       notify: Reload haproxy {{ _haproxy.instance_name }}
     - name: Inform external collector about our certificate location
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: /etc/cert_exp_time_globs
         owner: root
         group: root
@@ -92,7 +92,7 @@
   when: _haproxy.error_files is defined
   block:
     - name: Create errorfiles directory
-      file:
+      ansible.builtin.file:
         path: "/etc/{{ _haproxy.instance_name }}/errorfiles"
         state: directory
         owner: root
@@ -100,7 +100,7 @@
         mode: 0755
 
     - name: Copy HAProxy error message files
-      copy:
+      ansible.builtin.copy:
         src: "etc/{{ _haproxy.instance_name }}/errorfiles/{{ item }}"
         dest: "/etc/{{ _haproxy.instance_name }}/errorfiles/{{ item }}"
         owner: root
@@ -111,7 +111,7 @@
       notify: Reload haproxy {{ _haproxy.instance_name }}
 
 - name: Copy additional configuration files
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/etc/{{ _haproxy.instance_name }}/{{ item | basename }}"
     owner: root
@@ -121,7 +121,7 @@
   notify: Reload haproxy {{ _haproxy.instance_name }}
 
 - name: Ensure token map file exists
-  file:
+  ansible.builtin.file:
     name: "{{ _haproxy.token_map_file.path }}"
     state: touch
     owner: "{{ _haproxy.token_map_file.owner }}"
@@ -130,7 +130,7 @@
   when: _haproxy.token_map_file is defined
 
 - name: Create HAProxy configuration file
-  template:
+  ansible.builtin.template:
     src: "{% if _haproxy.use_default_template %}etc/haproxy/__role_default_haproxy.cfg__.j2{% else %}etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name }}.cfg{% if _haproxy.use_consul_template %}.ctpl{% endif %}.j2{% endif %}"
     dest: "/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name }}.cfg{% if _haproxy.use_consul_template %}.ctpl{% endif %}"
     owner: root

@@ -6,13 +6,13 @@
 # uses.
 
 - name: Reload haproxy demo-haproxy
-  service:
+  ansible.builtin.service:
     name: "demo-haproxy"
     state: reloaded
   when: _haproxy.reload_if_changed and (configuration is changed or certificates is changed or error_files is changed)
 
 - name: Restart rsyslog
-  service:
+  ansible.builtin.service:
     name: "rsyslog"
     state: restarted
   when: _haproxy.reload_if_changed and rsyslog is changed
