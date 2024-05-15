@@ -29,17 +29,22 @@ _haproxy:
         - { id: "local", ip: "127.0.0.1",       port: 53 }
         - { id: "aws",   ip: "169.254.169.253", port: 53 }
       options: [ ]
+    - id: "other"
+      nameservers:
+        - { id: "local", ip: "127.0.0.53",       port: 53 }
+        - { id: "aws",   ip: "169.254.169.253", port: 53 }
+      options: [ ]
   proxies:
     - name: "proxy1"
       options: [ ]
       binds:   [ { ip: "127.0.0.1", port: 8080 } ]
       servers:
-        - { name: "server1", ip: "server1", port: 8080, ssl: true, check_addr: "127.0.0.2", ssl_verify: "none" }
-        - { name: "server1", ip: "server1", port: 8080, ssl: true, check_addr: "127.0.0.2", check_ssl: false }
+        - { name: "server1", ip: "169.254.0.1", port: 8080, ssl: true, check_addr: "127.0.0.2", ssl_verify: "none" }
+        - { name: "server2", ip: "169.254.0.2", port: 8080, ssl: true, check_addr: "127.0.0.2", check_ssl: false }
     - name: "proxy2"
       options: [ "option dontlog-normal"]
       binds:   [ { ip: "127.0.0.1", port: 9090, ssl: true } ]
       resolvers: "default"
       servers:
-        - { name: "server3", ip: "server3.example.com", port: 9200, ssl: false, check_port: 9299 }
-        - { name: "server4", ip: "server4.example.com", port: 9200, ssl: false, resolvers: "other" }
+        - { name: "server3", ip: "169.254.0.3", port: 9200, ssl: false, check_port: 9299 }
+        - { name: "server4", ip: "localhost", port: 9200, ssl: false, resolvers: "other" }

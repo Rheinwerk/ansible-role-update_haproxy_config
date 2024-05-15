@@ -18,6 +18,53 @@
         name: haproxy
       when: "'molecule-idempotence-notest' not in ansible_skip_tags"
 
+    - name: Create self-signed certificate
+      when: "'molecule-idempotence-notest' not in ansible_skip_tags"
+      block:
+        - name: Install cryptography python package
+          ansible.builtin.pip:
+            name: cryptography
+
+        - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+          community.crypto.openssl_privatekey_pipe:
+          register: openssl_privatekey
+          no_log: true
+
+        - name: Create certificate signing request (CSR)
+          community.crypto.openssl_csr_pipe:
+            privatekey_content: "{{ openssl_privatekey.privatekey }}"
+            country_name: DE
+            state_or_province_name: Nordrhein-Westfalen
+            organization_name: CenterDevice GmbH
+            organizational_unit_name: The Bridge
+            common_name: "{{ ansible_fqdn }}"
+            subject_alt_name:
+              - "DNS:{{ ansible_fqdn }}"
+          register: openssl_csr
+
+        - name: Create self-signed certificate from CSR
+          community.crypto.x509_certificate_pipe:
+            provider: selfsigned
+            privatekey_content: "{{ openssl_privatekey.privatekey }}"
+            csr_content: "{{ openssl_csr.csr }}"
+          register: x509_certificate
+
+        - name: Create HAProxy SSL directory
+          ansible.builtin.file:
+            path: '/etc/demo-haproxy/ssl'
+            state: directory
+            mode: "0755"
+            owner: haproxy
+            group: haproxy
+
+        - name: Template combined certificate
+          ansible.builtin.template:
+            src: etc/haproxy/ssl/cert.crt.j2
+            dest: /etc/demo-haproxy/ssl/self_signed.de_combined.crt
+            owner: haproxy
+            group: haproxy
+            mode: "0640"
+
   tasks:
     - name: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
       ansible.builtin.include_role:
