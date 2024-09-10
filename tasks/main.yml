@@ -130,7 +130,6 @@
   when: _haproxy.token_map_file is defined
 
 - name: Configure HAProxy IP blacklist file
-  when: _haproxy.ip_blacklist is defined and _haproxy.ip_blacklist | length > 0
   ansible.builtin.template:
     src: "etc/haproxy/ip_blacklist.j2"
     dest:  "/etc/{{ _haproxy.instance_name }}/ip_blacklist"
