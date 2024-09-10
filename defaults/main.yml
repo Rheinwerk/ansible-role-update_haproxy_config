@@ -23,6 +23,7 @@ _haproxy:
       - { ip: "{{ ansible_default_ipv4.address }}", port: 8404 }
   ciphers: "ECDH:EDH:DH:!ECDSA:!DSS:!ADH:!NULL:!aNULL:!LOW:!MD5:!RC4:!DES:!3DES:!SEED:!CAMELLIA:!EXPORT"
   frontend_bind_ip: "{{ ansible_default_ipv4.address }}"
+  ip_blacklist: []
   resolvers:
     - id: "default"
       nameservers:
