@@ -58,7 +58,7 @@ listen admin
 {% for p in _haproxy.proxies %}
 listen {{ p.name }}
 {% for bind in p.binds %}
-  bind {{ bind.ip }}:{{ bind.port }}{% if bind.ssl|default(false) %} ssl crt /etc/{{ _haproxy.instance_name }}/ssl{% endif %}
+  bind {{ bind.ip }}:{{ bind.port }}{% if bind.ssl|default(false) %} ssl crt /etc/{{ _haproxy.instance_name }}/ssl{% endif %}{% if bind.ssl_client_cert|default(false) %} verify required ca-file {{ p.intermediate_ca }} ca-verify-file {{ p.root_ca }}{% endif %}
 
 {% endfor %}
 {% for opt in p.options %}
