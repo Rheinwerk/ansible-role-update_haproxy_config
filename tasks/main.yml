@@ -136,13 +136,7 @@
     owner: root
     group: haproxy
     mode: 0640
-  when: _haproxy.ip_blacklist is defined and _haproxy.ip_blacklist | length > 0
-
-- name: Remove HAProxy IP blacklist file
-  ansible.builtin.file:
-    path: /etc/haproxy/ip_blacklist
-    state: absent
-  when: _haproxy.ip_blacklist is undefined or _haproxy.ip_blacklist | length == 0
+  when: _haproxy.ip_blacklist is defined
 
 - name: Create HAProxy configuration file
   ansible.builtin.template:
