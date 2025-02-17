@@ -145,5 +145,6 @@
     owner: root
     group: haproxy
     mode: 0640
+    validate: 'haproxy -f %s -c'
   register: configuration
   notify: Reload haproxy {{ _haproxy.instance_name }}
