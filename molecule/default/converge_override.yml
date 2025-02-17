@@ -1,0 +1,30 @@
+---
+# skip idempotence tests
+- name: Include HAProxy install role
+  ansible.builtin.include_role:
+    name: haproxy
+  when: "'molecule-idempotence-notest' not in ansible_skip_tags"
+
+- name: Create HAPRoxy SSL keys and certs
+  when: "'molecule-idempotence-notest' not in ansible_skip_tags"
+  block:
+    - name: Create files/etc/filebeat/ssl directory
+      ansible.builtin.file:
+        path: "/etc/demo-haproxy/ssl"
+        state: directory
+        recurse: true
+        mode: "0755"
+
+    - name: Generate /etc/demo-haproxy/ssl/client.crt.key
+      community.crypto.openssl_privatekey:
+        path: "/etc/demo-haproxy/ssl/client.crt.key"
+        size: 2048
+        cipher: auto
+        mode: "0644"
+
+    - name: Generate /etc/demo-haproxy/ssl/ssl/client.crt
+      community.crypto.x509_certificate:
+        path: "/etc/demo-haproxy/ssl/client.crt"
+        privatekey_path: "/etc/demo-haproxy/ssl/client.crt.key"
+        provider: selfsigned
+        mode: "0644"
