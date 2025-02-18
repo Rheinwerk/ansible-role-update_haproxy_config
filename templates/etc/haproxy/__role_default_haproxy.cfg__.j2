@@ -48,6 +48,7 @@ listen admin
   bind {% for bind in _haproxy.admin.binds %}{{ bind.ip }}:{{ bind.port }}{%if not loop.last%},{%endif%}{%endfor%}
 
   mode http
+  option dontlog-normal
   stats enable
   stats auth {{ _haproxy.admin.user }}:{{ _haproxy.admin.password }}
   stats uri /monitor
