@@ -56,10 +56,32 @@ listen admin
   stats show-desc instance name sidecar {{ _haproxy.instance_name }}
   stats refresh 10s
 
+{% for userlist in _haproxy.userlists %}
+{% set groups = [] %}
+userlist {{ userlist.name }}
+{% for user in userlist.users %}
+{% if user['groups'] is defined %}
+{% set _ = groups.extend(user['groups']) %}
+{% set user_groups = ' groups ' ~ user['groups'] | join(',') %}
+{% else %}
+{% set user_groups = '' %}
+{% endif %}
+{% if user['password'] is defined %}
+  user {{ user.name }} password {{ user.password }}{{ user_groups }}
+{% elif user['insecure_password'] is defined %}
+  user {{ user.name }} insecure-password {{ user.insecure_password }}{{ user_groups }}
+{% endif %}
+{% endfor %}
+{% for group in groups | unique %}
+  group {{ group }}
+{% endfor %}
+
+{% endfor %}
+
 {% for p in _haproxy.proxies %}
 listen {{ p.name }}
 {% for bind in p.binds %}
-  bind {{ bind.ip }}:{{ bind.port }}{% if bind.ssl|default(false) %} ssl crt /etc/{{ _haproxy.instance_name }}/ssl{% endif %}{% if bind.ssl_client_cert|default(false) %} verify required ca-file {{ p.intermediate_ca }} ca-verify-file {{ p.root_ca }}{% endif %}
+  bind {{ bind.ip }}:{{ bind.port }}{% if bind.accept_proxy|default(false)%} accept-proxy{%endif%}{% if bind.ssl|default(false) %} ssl crt /etc/{{ _haproxy.instance_name }}/ssl{% endif %}{% if bind.ssl_client_cert|default(false) %} verify required ca-file {{ p.intermediate_ca }} ca-verify-file {{ p.root_ca }}{% endif %}
 
 {% endfor %}
 {% for opt in p.options %}

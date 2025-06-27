@@ -40,6 +40,7 @@ _haproxy:
         - "# Ensure we can handle larger responses with multiple"
         - "# records -- default is only 512 bytes"
         - "accepted_payload_size 8192"
+  userlists: []
   proxies:
     - name: "proxy1"
       options: [ "option dontlog-normal"]
