@@ -41,6 +41,7 @@ _haproxy:
         - "# records -- default is only 512 bytes"
         - "accepted_payload_size 8192"
   userlists: []
+  listen: []
   frontends: []
   backends: []
   proxies:
