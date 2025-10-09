@@ -14,19 +14,19 @@
         state: directory
         owner: root
         group: haproxy
-        mode: 0550
+        mode: "0550"
     - name: Create chroot/dev for rsyslog
       ansible.builtin.file:
         name: "{{ _haproxy.chroot.directory }}/dev"
         state: directory
         owner: root
         group: haproxy
-        mode: 0550
+        mode: "0550"
     - name: Create rsyslog config for chroot
       ansible.builtin.template:
         src: "etc/rsyslog.d/haproxy.conf.j2"
         dest: "/etc/rsyslog.d/49-haproxy-{{ _haproxy.instance_name }}.conf"
-        mode: 0644
+        mode: "0644"
       register: rsyslog
       notify: Restart rsyslog
 
@@ -36,7 +36,7 @@
     state: directory
     owner: root
     group: haproxy
-    mode: 0755
+    mode: "0755"
 
 - name: Create HAProxy systemd helper script
   ansible.builtin.file:
@@ -76,7 +76,7 @@
         dest: "/etc/{{ _haproxy.instance_name }}"
         owner: root
         group: haproxy
-        mode: 0640
+        mode: "0640"
       register: certificates
       notify: Reload haproxy {{ _haproxy.instance_name }}
     - name: Inform external collector about our certificate location
@@ -84,7 +84,7 @@
         dest: /etc/cert_exp_time_globs
         owner: root
         group: root
-        mode: 0644
+        mode: "0644"
         create: yes
         line: "/etc/{{ _haproxy.instance_name }}/ssl/*"
 
@@ -97,7 +97,7 @@
         state: directory
         owner: root
         group: haproxy
-        mode: 0755
+        mode: "0755"
 
     - name: Copy HAProxy error message files
       ansible.builtin.copy:
@@ -105,7 +105,7 @@
         dest: "/etc/{{ _haproxy.instance_name }}/errorfiles/{{ item }}"
         owner: root
         group: haproxy
-        mode: 0640
+        mode: "0640"
       with_items: "{{ _haproxy.error_files }}"
       register: error_files
       notify: Reload haproxy {{ _haproxy.instance_name }}
@@ -116,7 +116,7 @@
     dest: "/etc/{{ _haproxy.instance_name }}/{{ item | basename }}"
     owner: root
     group: haproxy
-    mode: 0640
+    mode: "0640"
   with_fileglob: "files/etc/{{ _haproxy.instance_name }}/*"
   notify: Reload haproxy {{ _haproxy.instance_name }}
 
@@ -132,19 +132,19 @@
 - name: Configure HAProxy IP blacklist file
   ansible.builtin.template:
     src: "etc/haproxy/ip_blacklist.j2"
-    dest:  "/etc/{{ _haproxy.instance_name }}/ip_blacklist"
+    dest: "/etc/{{ _haproxy.instance_name }}/ip_blacklist"
     owner: root
     group: haproxy
-    mode: 0640
+    mode: "0640"
   when: _haproxy.ip_blacklist is defined
 
 - name: Copy dhparam file
   ansible.builtin.copy:
     src: "etc/haproxy/ffdhe2048"
-    dest:  "/etc/{{ _haproxy.instance_name }}/ffdhe2048"
+    dest: "/etc/{{ _haproxy.instance_name }}/ffdhe2048"
     owner: root
     group: haproxy
-    mode: 0640
+    mode: "0640"
 
 - name: Create HAProxy configuration file
   ansible.builtin.template:
@@ -152,7 +152,7 @@
     dest: "/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name }}.cfg{% if _haproxy.use_consul_template %}.ctpl{% endif %}"
     owner: root
     group: haproxy
-    mode: 0640
+    mode: "0640"
     validate: 'haproxy -f %s -c'
   register: configuration
   notify: Reload haproxy {{ _haproxy.instance_name }}
