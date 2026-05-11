@@ -16,12 +16,15 @@ global
   ssl-default-bind-options no-sslv3
   tune.ssl.default-dh-param 2048
   hard-stop-after 30s
+{% for line in _haproxy.global_raw_options | default([]) %}
+  {{ line }}
+{% endfor %}
 
 
 defaults
-  mode tcp
+  mode {{ _haproxy.defaults.mode | default('tcp') }}
   log global
-  option tcplog
+  option {{ _haproxy.defaults.log_option | default('tcplog') }}
   option dontlognull
   option http-keep-alive
   timeout http-request 10s
@@ -33,6 +36,9 @@ defaults
   timeout check 5s
   retries 3
   maxconn 2000
+{% for option in _haproxy.defaults.options | default([]) %}
+  option {{ option }}
+{% endfor %}
 
 {% for r in _haproxy.resolvers  %}
 resolvers {{ r.id }}
@@ -56,6 +62,13 @@ listen admin
   stats show-desc instance name sidecar {{ _haproxy.instance_name }}
   stats refresh 10s
 
+{% for cache in _haproxy.caches | default([]) %}
+cache {{ cache.name }}
+{% for option in cache.options %}
+  {{ option }}
+{% endfor %}
+
+{% endfor %}
 {% for userlist in _haproxy.userlists | default([]) %}
 {% set groups = [] %}
 userlist {{ userlist.name }}
@@ -379,7 +392,9 @@ backend {{ backend.name }}
 {% if backend.mode is defined %}
   mode {{ backend.mode }}
 {% endif %}
+{% if backend.balance is defined %}
   balance {{ backend.balance }}
+{% endif %}
 {% if backend.source is defined %}
   source {{ backend.source }}
 {% endif %}
