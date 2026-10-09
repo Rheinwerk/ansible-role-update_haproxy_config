@@ -12,11 +12,9 @@ global
 {% endif %}
   user haproxy
   group haproxy
-  ssl-default-bind-ciphers {{ _haproxy.ciphers }}
-{% if _haproxy.ciphersuites is defined %}
-  ssl-default-bind-ciphersuites {{ _haproxy.ciphersuites }}
-{% endif %}
-  ssl-default-bind-options no-sslv3{{ (' ssl-min-ver ' ~ _haproxy.ssl_min_ver) if _haproxy.ssl_min_ver is defined else '' }}
+  ssl-default-bind-ciphers {{ _haproxy.ciphers | default(_haproxy_tls.ciphers) }}
+  ssl-default-bind-ciphersuites {{ _haproxy.ciphersuites | default(_haproxy_tls.ciphersuites) }}
+  ssl-default-bind-options no-sslv3 ssl-min-ver {{ _haproxy.ssl_min_ver | default(_haproxy_tls.ssl_min_ver) }}
   tune.ssl.default-dh-param 2048
   hard-stop-after 30s
 {% for line in _haproxy.global_raw_options | default([]) %}
