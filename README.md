@@ -18,6 +18,9 @@ Role Variables
 There is one main variable that drives this role: `_update_haproxy_config`. It is a map that contains all configuration and settings for this role.
 Please see `defaults/main.yml` for details.
 
+The default template sets `ciphers` (TLS <= 1.2), `ciphersuites` (TLS 1.3, optional) and `ssl_min_ver` (optional) as the global bind defaults.
+The defaults follow the [Mozilla intermediate profile](https://ssl-config.mozilla.org/guidelines/latest.json); Renovate opens a pull request when a new guidelines release changes them (see `renovate.json`).
+
 Dependencies
 ------------
 
