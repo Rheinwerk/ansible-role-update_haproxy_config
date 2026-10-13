@@ -30,8 +30,8 @@ _haproxy:
     password: "secret-from-vault"
     binds:
       - { ip: "127.0.0.1", port: 8404 }
-      - { ip: "{{ ansible_default_ipv4.address }}", port: 8404 }
-  frontend_bind_ip: "{{ ansible_default_ipv4.address }}"
+      - { ip: "{{ ansible_facts['default_ipv4'].address }}", port: 8404 }
+  frontend_bind_ip: "{{ ansible_facts['default_ipv4'].address }}"
   ip_blacklist: []
   resolvers:
     - id: "default"
