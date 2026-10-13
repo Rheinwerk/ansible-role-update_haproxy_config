@@ -1,0 +1,40 @@
+---
+# The role writes its own systemd unit for the instance. Restart and reload HAProxy
+# through that unit, so a unit the installed HAProxy version rejects fails here.
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Read the HAProxy version under test
+      ansible.builtin.command: haproxy -v
+      register: verify_haproxy_version
+      changed_when: false
+
+    - name: Show the HAProxy version under test
+      ansible.builtin.debug:
+        msg: "{{ verify_haproxy_version.stdout_lines | first }}"
+
+    # restarted, not started: converge already started HAProxy, and only a
+    # (re)start runs the unit's ExecStartPre
+    - name: Restart HAProxy with the role's unit
+      ansible.builtin.systemd:
+        name: demo-haproxy
+        state: restarted
+        daemon_reload: true
+
+    - name: Reload HAProxy with the role's unit
+      ansible.builtin.systemd:
+        name: demo-haproxy
+        state: reloaded
+
+    - name: Read the unit state
+      ansible.builtin.command: systemctl is-active demo-haproxy
+      register: verify_haproxy_state
+      changed_when: false
+      failed_when: false
+
+    - name: HAProxy runs with the role's unit and configuration
+      ansible.builtin.assert:
+        that: verify_haproxy_state.stdout == 'active'
+        fail_msg: "demo-haproxy is {{ verify_haproxy_state.stdout }}"
