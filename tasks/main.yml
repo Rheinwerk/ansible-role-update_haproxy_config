@@ -66,6 +66,7 @@
     path: "files/etc/{{ _haproxy.instance_name }}/ssl"
   register: ssl_dir
   delegate_to: localhost
+  become: false
 
 - name: Configure SSL Directory
   when: ssl_dir.stat.exists
