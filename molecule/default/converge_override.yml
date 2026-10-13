@@ -3,6 +3,20 @@
 - name: Include HAProxy install role
   ansible.builtin.include_role:
     name: haproxy
+  vars:
+    # the haproxy role's defaults, with the HAProxy version per release:
+    # haproxy.debian.net has no 2.8 for Debian 13
+    _haproxy:
+      use_default_config: "yes"
+      instance_name: "demo-haproxy"
+      version: "{{ '3.2*' if ansible_distribution_major_version is version('13', '>=') else '2.8*' }}"
+      admin:
+        user: "admin"
+        password: "this-is-secret"
+        binds:
+          - ip: "0.0.0.0"
+            port: 8404
+      error_files: []
   when: "'molecule-idempotence-notest' not in ansible_skip_tags"
 
 - name: Create HAPRoxy SSL keys and certs

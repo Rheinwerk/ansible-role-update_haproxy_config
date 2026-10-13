@@ -36,5 +36,11 @@ jobs:
       molecule_debug: ${{ format('{0}', inputs.molecule_debug) }}
       args: ${{ inputs.args }}
       molecule_ref: ${{ inputs.molecule_ref || 'main' }}
+      # Debian 12 tests HAProxy 2.8, Debian 13 HAProxy 3.2 (see molecule/default/converge_override.yml)
+      matrix: >-
+        [{"distro": "debian-12", "ansible_scenario": "ansible_current", "experimental": false},
+         {"distro": "debian-12", "ansible_scenario": "ansible_next", "experimental": true},
+         {"distro": "debian-12", "ansible_scenario": "ansible_latest", "experimental": true},
+         {"distro": "debian-13", "ansible_scenario": "ansible_current", "experimental": false}]
     # passes GALAXY_API_KEY for the release job
     secrets: inherit
