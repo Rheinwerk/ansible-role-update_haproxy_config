@@ -1,3 +1,5 @@
 - src: https://github.com/Rheinwerk/ansible-role-haproxy.git
   name: haproxy
   scm: git
+  # last release with the _haproxy dict that converge_override.yml passes; v2.0.0 uses flat variables
+  version: v1.5.1
