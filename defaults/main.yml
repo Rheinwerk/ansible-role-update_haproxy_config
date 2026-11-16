@@ -14,7 +14,6 @@ _haproxy_tls:
 _haproxy:
   instance_name: "demo-haproxy"
   use_default_template: yes
-  use_consul_template: no
   logging:
     facility: "local1"
     level: "info"
